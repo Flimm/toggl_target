@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # @author Mosab Ibrahim <mosab.a.ibrahim@gmail.com>
 
+import datetime
+
 import requests
 
 from urllib.parse import urlencode
@@ -69,6 +71,22 @@ class TogglAPI(object):
         total_seconds_tracked = sum(max(entry['duration'], 0) for entry in time_entries)
 
         return (total_seconds_tracked / 60.0) / 60.0
+
+    def get_running_time_entry(self):
+        url = self._make_url(section='time_entries/current')
+        r = self._query(url=url, method='GET')
+        return r.json()
+
+    def get_running_time_entry_hours(self):
+        entry = self.get_running_time_entry()
+        if entry['data'] is None:
+            return 0.0
+        else:
+            start_datetime = datetime.datetime.fromisoformat(entry['data']['start'])
+            delta = datetime.datetime.now(datetime.timezone.utc) - start_datetime
+            return (delta.total_seconds() / 60.0) / 60.0
+
+
 
 
 if __name__ == '__main__':

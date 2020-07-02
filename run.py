@@ -4,6 +4,7 @@
 
 import os
 import sys
+import datetime
 import config
 import requests
 
@@ -82,6 +83,9 @@ def hilite(string, status, bold):
         attr.append('1')
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
 
+def format_hours(hours):
+    return "{}:{:02d}".format(int(hours), int((hours * 60) % 60))
+
 
 def main():
     w = workingtime.WorkingTime(config.WORKING_HOURS_PER_DAY, config.BUSINESS_DAYS, config.WEEK_DAYS)
@@ -130,6 +134,13 @@ def main():
     print("\nHow your progress looks:")
     bar = percentile_bar(t.achieved_percentage, config.TOLERANCE_PERCENTAGE)
     print(bar)
+
+    today_start = datetime.datetime(w.now.year, w.now.month, w.now.day)
+    todays_hours = sum([
+        a.get_hours_tracked(start_date=today_start, end_date=w.now),
+        a.get_running_time_entry_hours(),
+    ])
+    print("\nToday, you tracked {} hours".format(format_hours(todays_hours)))
 
 
 if __name__ == '__main__':
